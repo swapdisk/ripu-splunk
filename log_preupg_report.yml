@@ -1,0 +1,49 @@
+---
+- name: Log preupgrade report
+  hosts: all
+  strategy: free
+  gather_facts: true
+  become: true
+  force_handlers: true
+  tasks:
+    - name: Assemble payload for Splunk
+      ansible.builtin.set_fact: 
+        splunk: 
+          url: https://http-inputs-rhcorporate.splunkcloud.com/services/collector
+          index: rh_rhdp_ripu
+          token: "{{ hectoken }}"
+
+    - name: Collect JSON report results
+      ansible.builtin.slurp: 
+        src: /var/log/leapp/leapp-report.json
+      register: leapp_report
+
+    - name: Assemble payload for Splunk
+      ansible.builtin.set_fact: 
+        splunk_payload: 
+          sourcetype: _json
+          index: "{{ splunk.index }}"
+          event: 
+            event_type: leapp_report
+            hostname: "{{ ansible_facts.hostname }}"
+            os_version: "{{ ansible_facts.distribution_version }}"
+            report: "{{ leapp_report.content | b64decode | from_json }}"
+
+    - name: Send event to Splunk
+      ansible.builtin.uri: 
+        url: "{{ splunk.url }}"
+        headers: 
+          Authorization: "Splunk {{ splunk.token }}"
+        method: POST
+        body: "{{ splunk_payload }}"
+        body_format: json
+        return_content: true
+      delegate_to: localhost
+      become: false
+      ignore_errors: yes
+      changed_when: false
+      register: splunk_send
+
+    - name: Debug output
+      debug: 
+        var: splunk_send
