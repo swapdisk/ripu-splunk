@@ -6,7 +6,7 @@
   become: true
   force_handlers: true
   tasks:
-    - name: Assemble payload for Splunk
+    - name: Set facts for collector
       ansible.builtin.set_fact: 
         splunk: 
           url: https://http-inputs-rhcorporate.splunkcloud.com/services/collector
