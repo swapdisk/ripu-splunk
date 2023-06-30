@@ -9,9 +9,9 @@
     - name: Set facts for collector
       ansible.builtin.set_fact: 
         splunk: 
-          url: https://http-inputs-rhcorporate.splunkcloud.com/services/collector
-          index: rh_rhdp_ripu
-          token: "{{ hectoken }}"
+          url: "{{ splunk_url }}"
+          index: "{{ splunk_index }}"
+          token: "{{ splunk_hectoken }}"
 
     - name: Collect JSON report results
       ansible.builtin.slurp: 
