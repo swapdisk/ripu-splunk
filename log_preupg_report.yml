@@ -6,6 +6,9 @@
   become: true
   force_handlers: true
   tasks:
+    - name: Gather package facts
+      ansible.builtin.package_facts:
+
     - name: Log preupgrade report
       when: "'leapp' in ansible_facts.packages"
       block:
