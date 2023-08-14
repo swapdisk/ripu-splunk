@@ -80,7 +80,7 @@
 
     - name: Declare success
       ansible.builtin.debug:
-        msg: |
-          The Spring Pet Clinic web app is installed and started successfully.
-          Access the app at http://{{ lookup('ansible.builtin.url', 'http://ifconfig.me/ip') }}:8080
-          Have a nice day!
+        msg:
+          - The Spring Pet Clinic web app is installed and started successfully.
+          - Access the app at http://{{ lookup('ansible.builtin.url', 'http://ifconfig.me/ip') }}:8080
+          - Have a nice day!
