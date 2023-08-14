@@ -78,9 +78,15 @@
         special_time: reboot
         job: 'cd $HOME/spring-petclinic && ./mvnw spring-boot:run -Dspring-boot.run.profiles=mysql >> $HOME/app.log 2>&1'
 
+    - name: Determine web app external URL
+      ansible.builtin.uri:
+        url: http://ifconfig.me/ip
+        return_content: true
+      register: external_ip
+
     - name: Declare success
       ansible.builtin.debug:
         msg:
           - The Spring Pet Clinic web app is installed and started successfully.
-          - Access the app at http://{{ lookup('ansible.builtin.url', 'http://ifconfig.me/ip') }}:8080
+          - Access the app at http://{{ external_ip.content }}:8080
           - Have a nice day!
