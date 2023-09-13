@@ -8,4 +8,4 @@
 
     - name: Set vars from EC2 metadata
       ansible.builtin.debug:
-        var: ansible_facts.ansible_ec2_placement_availability_zone
+        var: ansible_ec2_placement_availability_zone
