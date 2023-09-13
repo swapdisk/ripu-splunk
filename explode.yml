@@ -1,0 +1,49 @@
+---
+---
+- name: Play with EC2 and controller bits
+  hosts: "{{ HOSTS | default('control[0]') }}"
+  connection: local
+  tasks:
+    - name: Gather EC2 metadata facts
+      amazon.aws.ec2_metadata_facts:
+
+    - name: Set vars from EC2 metadata
+      ansible.builtin.debug:
+        var:
+          - ansible_ec2_mac
+          - ansible_ec2_metrics_vhostmd
+          - ansible_ec2_network_interfaces_macs_mac_address_device_number
+          - ansible_ec2_network_interfaces_macs_mac_address_interface_id
+          - ansible_ec2_network_interfaces_macs_mac_address_ipv4_associations_ip_address
+          - ansible_ec2_network_interfaces_macs_mac_address_ipv6s
+          - ansible_ec2_network_interfaces_macs_mac_address_local_hostname
+          - ansible_ec2_network_interfaces_macs_mac_address_local_ipv4s
+          - ansible_ec2_network_interfaces_macs_mac_address_mac
+          - ansible_ec2_network_interfaces_macs_mac_address_owner_id
+          - ansible_ec2_network_interfaces_macs_mac_address_public_hostname
+          - ansible_ec2_network_interfaces_macs_mac_address_public_ipv4s
+          - ansible_ec2_network_interfaces_macs_mac_address_security_group_ids
+          - ansible_ec2_network_interfaces_macs_mac_address_security_groups
+          - ansible_ec2_network_interfaces_macs_mac_address_subnet_id
+          - ansible_ec2_network_interfaces_macs_mac_address_subnet_ipv4_cidr_block
+          - ansible_ec2_network_interfaces_macs_mac_address_subnet_ipv6_cidr_blocks
+          - ansible_ec2_network_interfaces_macs_mac_address_vpc_id
+          - ansible_ec2_network_interfaces_macs_mac_address_vpc_ipv4_cidr_block
+          - ansible_ec2_network_interfaces_macs_mac_address_vpc_ipv4_cidr_blocks
+          - ansible_ec2_network_interfaces_macs_mac_address_vpc_ipv6_cidr_blocks
+          - ansible_ec2_placement_availability_zone
+          - ansible_ec2_placement_region
+          - ansible_ec2_product_codes
+          - ansible_ec2_profile
+          - ansible_ec2_public_hostname
+          - ansible_ec2_public_ipv4
+          - ansible_ec2_public_key
+          - ansible_ec2_ramdisk_id
+          - ansible_ec2_reservation_id
+          - ansible_ec2_security_groups
+          - ansible_ec2_services_domain
+          - ansible_ec2_services_partition
+          - ansible_ec2_spot_termination_time
+          - ansible_ec2_user_data
+          - ansible_ec2_instance_identity_document_region
+...
