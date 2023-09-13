@@ -33,6 +33,8 @@
                 event_type: leapp_report
                 hostname: "{{ ansible_facts.hostname }}"
                 os_version: "{{ ansible_facts.distribution_version }}"
+                pet_app_env: "{{ ['Dev','Test','Prod'] | random(seed=ansible_facts.hostname | hash('md5')) }}"
+                pet_app_team: "{{ ['Bird','Cat','Dog','Fish','Hamster','Lizard','Snake'] | random(seed=ansible_facts.hostname) }}"
                 report: "{{ leapp_report.content | b64decode | from_json }}"
 
         - name: Send event to Splunk
