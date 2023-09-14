@@ -11,6 +11,7 @@
 
     - name: Gather EC2 metadata facts
       local_action: amazon.aws.ec2_metadata_facts
+      ignore_errors: true
 
     - name: Log preupgrade report
       when:
@@ -40,7 +41,7 @@
                 os_version: "{{ ansible_facts.distribution_version }}"
                 pet_app_env: "{{ ['Dev','Test','Prod'] | random(seed=ansible_facts.hostname | hash('md5')) }}"
                 pet_app_team: "{{ ['Bird','Cat','Dog','Fish','Hamster','Lizard','Snake'] | random(seed=ansible_facts.hostname) }}"
-                region: "{{ ansible_ec2_placement_region }}"                
+                region: "{{ ansible_ec2_placement_region | default('undefined') }}"                
                 report: "{{ leapp_report.content | b64decode | from_json }}"
 
         - name: Send event to Splunk
@@ -54,7 +55,7 @@
             return_content: true
           delegate_to: localhost
           become: false
-          ignore_errors: yes
+          ignore_errors: true
           changed_when: false
           register: splunk_send
 
