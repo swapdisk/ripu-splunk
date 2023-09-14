@@ -13,23 +13,23 @@
       when: "'leapp' in ansible_facts.packages"
       block:
         - name: Set facts for collector
-          ansible.builtin.set_fact: 
-            splunk: 
+          ansible.builtin.set_fact:
+            splunk:
               url: "{{ splunk_url }}"
               index: "{{ splunk_index }}"
               token: "{{ splunk_hectoken }}"
 
         - name: Collect JSON report results
-          ansible.builtin.slurp: 
+          ansible.builtin.slurp:
             src: /var/log/leapp/leapp-report.json
           register: leapp_report
 
         - name: Assemble payload for Splunk
-          ansible.builtin.set_fact: 
-            splunk_payload: 
+          ansible.builtin.set_fact:
+            splunk_payload:
               sourcetype: _json
               index: "{{ splunk.index }}"
-              event: 
+              event:
                 event_type: leapp_report
                 hostname: "{{ ansible_facts.hostname }}"
                 os_version: "{{ ansible_facts.distribution_version }}"
@@ -38,9 +38,9 @@
                 report: "{{ leapp_report.content | b64decode | from_json }}"
 
         - name: Send event to Splunk
-          ansible.builtin.uri: 
+          ansible.builtin.uri:
             url: "{{ splunk.url }}"
-            headers: 
+            headers:
               Authorization: "Splunk {{ splunk.token }}"
             method: POST
             body: "{{ splunk_payload }}"
@@ -53,5 +53,5 @@
           register: splunk_send
 
         - name: Debug output
-          debug: 
+          debug:
             var: splunk_send
