@@ -14,6 +14,7 @@
       delegate_to: localhost
       become: false
       ignore_errors: true
+      when: ansible_system_vendor == "Amazon EC2" or ansible_system_vendor == "Xen"
 
     - name: Log preupgrade report
       when:
