@@ -7,6 +7,9 @@
     - name: Gather package facts
       ansible.builtin.package_facts:
 
+    - name: Get services
+      ansible.builtin.service_facts:
+
     - name: Gather EC2 metadata facts
       amazon.aws.ec2_metadata_facts:
       delegate_to: localhost
@@ -21,6 +24,10 @@
     - name: ansible_facts.ec2_placement_region
       ansible.builtin.debug:
         var: ansible_facts.ec2_placement_region
+
+    - name: ansible_facts.env.HOME
+      ansible.builtin.debug:
+        var: ansible_facts.env.HOME
 
     - name: ansible_env.HOME
       ansible.builtin.debug:
