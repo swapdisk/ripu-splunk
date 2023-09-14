@@ -10,7 +10,7 @@
       ansible.builtin.package_facts:
 
     - name: Gather EC2 metadata facts
-      amazon.aws.ec2_metadata_facts:
+      local_action: amazon.aws.ec2_metadata_facts
 
     - name: Log preupgrade report
       when:
