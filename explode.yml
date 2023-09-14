@@ -4,6 +4,9 @@
   connection: local
   gather_facts: true
   tasks:
+    - name: Gather package facts
+      ansible.builtin.package_facts
+
     - name: Gather EC2 metadata facts
       amazon.aws.ec2_metadata_facts:
       delegate_to: localhost
@@ -18,6 +21,18 @@
     - name: ansible_facts.ec2_placement_region
       ansible.builtin.debug:
         var: ansible_facts.ec2_placement_region
+
+    - name: ansible_env.HOME
+      ansible.builtin.debug:
+        var: ansible_env.HOME
+
+    - name: ansible_facts.services
+      ansible.builtin.debug:
+        var: ansible_facts.services
+
+    - name: ansible_services
+      ansible.builtin.debug:
+        var: ansible_services
 
     - name: Dump all facts
       ansible.builtin.debug:
