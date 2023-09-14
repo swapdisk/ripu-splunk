@@ -11,6 +11,7 @@
 
     - name: Gather EC2 metadata facts
       local_action: amazon.aws.ec2_metadata_facts
+      become: false
       ignore_errors: true
 
     - name: Log preupgrade report
