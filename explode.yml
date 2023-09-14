@@ -5,7 +5,7 @@
   gather_facts: true
   tasks:
     - name: Gather package facts
-      ansible.builtin.package_facts
+      ansible.builtin.package_facts:
 
     - name: Gather EC2 metadata facts
       amazon.aws.ec2_metadata_facts:
