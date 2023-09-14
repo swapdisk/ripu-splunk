@@ -10,7 +10,8 @@
       ansible.builtin.package_facts:
 
     - name: Gather EC2 metadata facts
-      local_action: amazon.aws.ec2_metadata_facts
+      amazon.aws.ec2_metadata_facts:
+      delegate_to: localhost
       become: false
       ignore_errors: true
 
@@ -20,35 +21,35 @@
         - "splunk_hectoken is defined"
       block:
         - name: Set facts for collector
-          ansible.builtin.set_fact: 
-            splunk: 
+          ansible.builtin.set_fact:
+            splunk:
               url: "{{ splunk_url }}"
               index: "{{ splunk_index }}"
               token: "{{ splunk_hectoken }}"
 
         - name: Collect JSON report results
-          ansible.builtin.slurp: 
+          ansible.builtin.slurp:
             src: /var/log/leapp/leapp-report.json
           register: leapp_report
 
         - name: Assemble payload for Splunk
-          ansible.builtin.set_fact: 
-            splunk_payload: 
+          ansible.builtin.set_fact:
+            splunk_payload:
               sourcetype: _json
               index: "{{ splunk.index }}"
-              event: 
+              event:
                 event_type: leapp_report
                 hostname: "{{ ansible_facts.hostname }}"
                 os_version: "{{ ansible_facts.distribution_version }}"
                 pet_app_env: "{{ ['Dev','Test','Prod'] | random(seed=ansible_facts.hostname | hash('md5')) }}"
                 pet_app_team: "{{ ['Bird','Cat','Dog','Fish','Hamster','Lizard','Snake'] | random(seed=ansible_facts.hostname) }}"
-                region: "{{ ansible_ec2_placement_region | default('undefined') }}"                
+                region: "{{ ansible_ec2_placement_region | default('undefined') }}"
                 report: "{{ leapp_report.content | b64decode | from_json }}"
 
         - name: Send event to Splunk
-          ansible.builtin.uri: 
+          ansible.builtin.uri:
             url: "{{ splunk.url }}"
-            headers: 
+            headers:
               Authorization: "Splunk {{ splunk.token }}"
             method: POST
             body: "{{ splunk_payload }}"
@@ -56,10 +57,5 @@
             return_content: true
           delegate_to: localhost
           become: false
-          ignore_errors: true
           changed_when: false
-          register: splunk_send
-
-        - name: Debug output
-          debug: 
-            var: splunk_send
+...
