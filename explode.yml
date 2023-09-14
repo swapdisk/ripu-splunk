@@ -1,8 +1,9 @@
 ---
 - name: Play with EC2 and controller bits
-  hosts: "{{ HOSTS | default('control[0]') }}"
-  connection: local
+  hosts: all
+  strategy: free
   gather_facts: true
+  become: true
   tasks:
     - name: Gather package facts
       ansible.builtin.package_facts:
