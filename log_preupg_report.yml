@@ -40,6 +40,7 @@
               index: "{{ splunk.index }}"
               event:
                 event_type: leapp_report
+                facts: "{{ ansible_facts | ansible.builtin.combine({'ansible_local': {}}) }}"
                 hostname: "{{ ansible_facts.hostname }}"
                 os_version: "{{ ansible_facts.distribution_version }}"
                 pet_app_env: "{{ ['Dev','Test','Prod'] | random(seed=ansible_facts.hostname | hash('md5')) }}"

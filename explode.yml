@@ -18,29 +18,9 @@
       ignore_errors: true
       when: ansible_system_vendor == "Amazon EC2" or ansible_system_vendor == "Xen"
 
-    - name: ansible_ec2_placement_region
+    - name: Dump all execpt local 
       ansible.builtin.debug:
-        var: ansible_ec2_placement_region
-
-    - name: ansible_facts.ec2_placement_region
-      ansible.builtin.debug:
-        var: ansible_facts.ec2_placement_region
-
-    - name: ansible_facts.env.HOME
-      ansible.builtin.debug:
-        var: ansible_facts.env.HOME
-
-    - name: ansible_env.HOME
-      ansible.builtin.debug:
-        var: ansible_env.HOME
-
-    - name: ansible_facts.services
-      ansible.builtin.debug:
-        var: ansible_facts.services
-
-    - name: ansible_services
-      ansible.builtin.debug:
-        var: ansible_services
+        var: "{{ ansible_facts | ansible.builtin.combine({'ansible_local': {}}) }}"
 
     - name: Dump all facts
       ansible.builtin.debug:
