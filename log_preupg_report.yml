@@ -53,9 +53,9 @@
           become: false
           changed_when: false
           register: splunk_send
-          nolog: true
+          no_log: true
 
         - name: Show send result
-          ansible.builtin.debug: 
+          ansible.builtin.debug:
             var: splunk_send
 ...
