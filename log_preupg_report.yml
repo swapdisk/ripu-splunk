@@ -20,8 +20,8 @@
 
     - name: Log preupgrade report
       when:
-        - "report_file.stat.exists"
-        - "splunk_hectoken is defined"
+        - report_file.stat.exists
+        - splunk_hectoken is defined
       block:
         - name: Collect JSON report results
           ansible.builtin.slurp:
@@ -37,7 +37,7 @@
                 event_type: leapp_report
                 hostname: "{{ ansible_facts.hostname }}"
                 os_version: "{{ ansible_facts.distribution_version }}"
-                pet_app_env: "{{ ['Dev','Test','Prod'] | random(seed=ansible_facts.hostname | hash('md5')) }}"
+                pet_app_env: "{{ ['Dev','Test','Prod'] | random(seed=ansible_facts.hostname }}"
                 pet_app_team: "{{ ['Bird','Cat','Dog','Fish','Hamster','Lizard','Snake'] | random(seed=ansible_facts.hostname) }}"
                 region: "{{ ansible_ec2_placement_region | default('undefined') }}"
                 report: "{{ leapp_report.content | b64decode | from_json }}"
@@ -61,6 +61,5 @@
         - name: Show send result
           ansible.builtin.debug:
             var: splunk_send
-          when:
-            - splunk_send | default(false)
+          when: splunk_send | default(false)
 ...
