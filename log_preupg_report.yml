@@ -55,8 +55,7 @@
           register: splunk_send
           nolog: true
 
-      - name: Debug output
-        debug: 
-          var: splunk_send
-
+        - name: Show send result
+          ansible.builtin.debug: 
+            var: splunk_send
 ...
