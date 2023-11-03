@@ -6,9 +6,6 @@
   become: true
   force_handlers: true
   tasks:
-    - name: Gather package facts
-      ansible.builtin.package_facts:
-
     - name: Gather EC2 metadata facts
       amazon.aws.ec2_metadata_facts:
       delegate_to: localhost
@@ -16,9 +13,14 @@
       ignore_errors: true
       when: ansible_system_vendor == "Amazon EC2" or ansible_system_vendor == "Xen"
 
+    - name: Get report file status
+      ansible.builtin.stat:
+        path: /var/log/leapp/leapp-report.json
+      register: report_file
+
     - name: Log preupgrade report
       when:
-        - "'leapp' in ansible_facts.packages"
+        - "report_file.stat.exists"
         - "splunk_hectoken is defined"
       block:
         - name: Collect JSON report results
