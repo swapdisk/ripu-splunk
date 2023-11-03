@@ -52,4 +52,11 @@
           delegate_to: localhost
           become: false
           changed_when: false
+          register: splunk_send
+          nolog: true
+
+      - name: Debug output
+        debug: 
+          var: splunk_send
+
 ...
