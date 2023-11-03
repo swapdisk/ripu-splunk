@@ -55,7 +55,10 @@
           register: splunk_send
           no_log: true
 
+      always:
         - name: Show send result
           ansible.builtin.debug:
             var: splunk_send
+          when:
+            - splunk_send | default(false)
 ...
