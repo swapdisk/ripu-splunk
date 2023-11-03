@@ -21,13 +21,6 @@
         - "'leapp' in ansible_facts.packages"
         - "splunk_hectoken is defined"
       block:
-        - name: Set facts for collector
-          ansible.builtin.set_fact:
-            splunk:
-              url: "{{ splunk_url }}"
-              index: "{{ splunk_index }}"
-              token: "{{ splunk_hectoken }}"
-
         - name: Collect JSON report results
           ansible.builtin.slurp:
             src: /var/log/leapp/leapp-report.json
@@ -37,7 +30,7 @@
           ansible.builtin.set_fact:
             splunk_payload:
               sourcetype: _json
-              index: "{{ splunk.index }}"
+              index: "{{ splunk_index }}"
               event:
                 event_type: leapp_report
                 hostname: "{{ ansible_facts.hostname }}"
@@ -49,9 +42,9 @@
 
         - name: Send event to Splunk
           ansible.builtin.uri:
-            url: "{{ splunk.url }}"
+            url: "{{ splunk_url }}"
             headers:
-              Authorization: "Splunk {{ splunk.token }}"
+              Authorization: "Splunk {{ splunk_hectoken }}"
             method: POST
             body: "{{ splunk_payload }}"
             body_format: json
