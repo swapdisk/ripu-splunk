@@ -26,3 +26,12 @@
       ansible.builtin.debug:
         var: ansible_facts
 
+    - name: Debug splunk_url
+      ansible.builtin.debug:
+        var: splunk_url
+
+    - name: Debug splunk_hectoken
+      ansible.builtin.debug:
+        var: splunk_hectoken
+
+
