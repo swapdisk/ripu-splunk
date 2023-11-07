@@ -42,10 +42,10 @@
       debug:
         var: fake_cred
 
-#   - name: Configure controller from project group_vars
-#     ansible.builtin.include_role:
-#       name: "{{ controller_infra_vars }}"
-#     loop: "{{ controller_infra_workloads }}"
-#     loop_control:
-#       loop_var: controller_infra_vars
-...
+    - name: Configure controller from project group_vars
+      ansible.builtin.include_role:
+        name: "{{ controller_infra_vars }}"
+      loop: "{{ controller_infra_workloads }}"
+      loop_control:
+        loop_var: controller_infra_vars
+ ..
