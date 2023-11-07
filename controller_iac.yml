@@ -48,4 +48,4 @@
       loop: "{{ controller_infra_workloads }}"
       loop_control:
         loop_var: controller_infra_vars
- ..
+...
