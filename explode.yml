@@ -7,8 +7,12 @@
   tasks:
     - name: Debug job id
       ansible.builtin.debug:
-        msg: "{{ awx_job_id | default('undefined') }}"
+        msg: "{{ awx_job_id | default(null) }}"
 
-    - name: Dump awx facts
+    - name: Debug nullity
       ansible.builtin.debug:
-        var: awx_facts
+        msg: "{{ blah123 | default(null) }}"
+
+    - name: Dump all facts
+      ansible.builtin.debug:
+        var: ansible_facts
