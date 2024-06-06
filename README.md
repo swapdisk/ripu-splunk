@@ -11,8 +11,8 @@ There are a number of event logging platforms that could be leveraged, however, 
 There are three example dashboards included with this reference implementation. Each dashboard is provided as a json file that can be imported into Splunk Dashboard Studio.
 
 - [Pre-upgrade Summary Dashboard](./dashboards/ripu-preupg-summary.json)
-- [Pre-upgrade Detail Report](./dashboard/ripu-preupg-detail.json)
-- [Upgrade Progress Timeline](./dashboard/ripu-upgrade-timeline.json)
+- [Pre-upgrade Detail Report](./dashboards/ripu-preupg-detail.json)
+- [Upgrade Progress Timeline](./dashboards/ripu-upgrade-timeline.json)
 
 ## Data structure of RIPU events
 
