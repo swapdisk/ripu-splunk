@@ -1,0 +1,246 @@
+{
+  "dataSources": {
+    "ds_base_search": {
+      "type": "ds.search",
+      "options": {
+        "query": "index=\"rh_rhdp_ripu\" event_type=\"playbook_run\" play_name=\"Upgrade\" pet_app_team=$team$ os_version=* success=*\n| where pet_app_env IN ($env$)\n| sort - time\n| dedup hostname,os_version",
+        "queryParameters": {
+          "earliest": "$global_time.earliest$",
+          "latest": "$global_time.latest$"
+        }
+      },
+      "name": "base"
+    },
+    "ds_table_chain": {
+      "type": "ds.chain",
+      "options": {
+        "extend": "ds_base_search",
+        "query": "|  eval Upgrade=case(success=\"false\", \"Failed\", like(os_version, \"8%\"), \"RHEL8\", like(os_version, \"9%\"), \"RHEL9\", true(), \"Unknown\") \n| timechart span=1d count by Upgrade"
+      },
+      "name": "table"
+    },
+    "ds_chart_chain": {
+      "type": "ds.chain",
+      "options": {
+        "extend": "ds_base_search",
+        "query": "| eval status=case(success=\"false\", \"Failed\", true(), \"Success\") \n| stats count by status"
+      },
+      "name": "chart"
+    },
+    "ds_count_chain": {
+      "type": "ds.chain",
+      "options": {
+        "extend": "ds_base_search",
+        "query": "| where success=\"true\"\n| eval status=case(like(os_version, \"8%\"), \"RHEL8\", like(os_version, \"9%\"), \"RHEL9\", true(), \"Unknown\")\n| stats count by status"
+      },
+      "name": "count"
+    }
+  },
+  "visualizations": {
+    "viz_timeline_column": {
+      "type": "splunk.column",
+      "dataSources": {
+        "primary": "ds_table_chain"
+      },
+      "context": {
+        "InhibitorsColumnFormatEditorConfig": {
+          "number": {
+            "thousandSeparated": false,
+            "unitPosition": "after"
+          }
+        },
+        "InhibitorsRowColorsEditorConfig": [
+          "#ffffff"
+        ],
+        "InhibitorsRowBackgroundColorsEditorConfig": [
+          {
+            "value": "#118832",
+            "to": 1
+          },
+          {
+            "value": "#d41f1f",
+            "from": 1
+          }
+        ],
+        "InhibitorsAlignConfig": [
+          "left"
+        ]
+      },
+      "eventHandlers": [],
+      "showProgressBar": false,
+      "showLastUpdated": false,
+      "title": "Upgrade Job Timeline",
+      "options": {
+        "y": "> primary | frameBySeriesNames('Failed','RHEL8','RHEL9')",
+        "y2": "> primary | frameBySeriesNames('')",
+        "stackMode": "stacked",
+        "columnGrouping": "overlay",
+        "x": "> primary | seriesByName('_time')",
+        "seriesColors": [
+          "#cf3f3f",
+          "#dd9900",
+          "#7f7ffF"
+        ]
+      }
+    },
+    "viz_status_pie": {
+      "type": "splunk.pie",
+      "dataSources": {
+        "primary": "ds_chart_chain"
+      },
+      "title": "Upgrade Status",
+      "options": {
+        "seriesColors": [
+          "#cf3f3f",
+          "#1f8f1f"
+        ]
+      }
+    },
+    "viz_version_pie": {
+      "type": "splunk.pie",
+      "dataSources": {
+        "primary": "ds_count_chain"
+      },
+      "title": "Upgrade RHEL Version",
+      "showProgressBar": false,
+      "showLastUpdated": false,
+      "options": {
+        "seriesColors": [
+          "#DD9900",
+          "#7f7ffF"
+        ]
+      }
+    }
+  },
+  "inputs": {
+    "input_global_trp": {
+      "type": "input.timerange",
+      "options": {
+        "token": "global_time",
+        "defaultValue": "-7d@h,now"
+      },
+      "title": "Global Time Range"
+    },
+    "input_team_dropdown": {
+      "options": {
+        "items": [
+          {
+            "label": "All",
+            "value": "*"
+          },
+          {
+            "label": "Dog",
+            "value": "Dog"
+          },
+          {
+            "label": "Cat",
+            "value": "Cat"
+          },
+          {
+            "label": "Bird",
+            "value": "Bird"
+          },
+          {
+            "label": "Hamster",
+            "value": "Hamster"
+          },
+          {
+            "label": "Snake",
+            "value": "Snake"
+          },
+          {
+            "label": "Lizard",
+            "value": "Lizard"
+          },
+          {
+            "label": "Fish",
+            "value": "Fish"
+          }
+        ],
+        "defaultValue": "*",
+        "token": "team"
+      },
+      "title": "App Team",
+      "type": "input.dropdown"
+    },
+    "input_env_multiselect": {
+      "options": {
+        "items": [
+          {
+            "label": "Test",
+            "value": "\"Test\""
+          },
+          {
+            "label": "Dev",
+            "value": "\"Dev\""
+          },
+          {
+            "label": "Prod",
+            "value": "\"Prod\""
+          }
+        ],
+        "defaultValue": [
+          "\"Test\"",
+          "\"Dev\"",
+          "\"Prod\""
+        ],
+        "token": "env"
+      },
+      "title": "Environment",
+      "type": "input.multiselect"
+    }
+  },
+  "layout": {
+    "type": "grid",
+    "options": {
+      "submitButton": true,
+      "submitOnDashboardLoad": true
+    },
+    "structure": [
+      {
+        "item": "viz_version_pie",
+        "type": "block",
+        "position": {
+          "x": 0,
+          "y": 0,
+          "w": 600,
+          "h": 275
+        }
+      },
+      {
+        "item": "viz_timeline_column",
+        "type": "block",
+        "position": {
+          "x": 0,
+          "y": 275,
+          "w": 1200,
+          "h": 725
+        }
+      },
+      {
+        "item": "viz_status_pie",
+        "type": "block",
+        "position": {
+          "x": 600,
+          "y": 0,
+          "w": 600,
+          "h": 275
+        }
+      }
+    ],
+    "globalInputs": [
+      "input_global_trp",
+      "input_env_multiselect",
+      "input_team_dropdown"
+    ]
+  },
+  "title": "RIPU Upgrade Progress Timeline",
+  "defaults": {
+    "dataSources": {
+      "ds.search": {
+        "options": {}
+      }
+    }
+  },
+  "description": "Upgrade automation jobs performed over a given time period"
+}

@@ -1,0 +1,177 @@
+{
+  "dataSources": {
+    "ds_table_search": {
+      "type": "ds.search",
+      "options": {
+        "query": "index=\"rh_rhdp_ripu\" event_type=\"leapp_report\" hostname=$host$ job_id=$job_id$\n| spath path=report.entries{} output=entries\n| mvexpand entries\n| spath input=entries path=title output=title\n| spath input=entries path=severity output=severity\n| spath input=entries path=summary output=summary\n| spath input=entries path=flags{} output=flags\n| spath input=entries path=detail.remediations{}.context output=remediations\n| eval Time=strftime(_time, \"%Y-%m-%d %H:%M:%S\"), severity_override=if(match(flags, \"inhibitor\"), \"inhibitor\", severity), search_string=if(\"$search$\"=\"*\", \"\", \"$search$\")\n| where match(summary, search_string)\n| search severity_override=$severity$\n| eval sort_field=case(severity_override=\"inhibitor\", 1, severity_override=\"high\", 2, severity_override=\"medium\", 3, severity_override=\"low\", 4, severity_override=\"info\", 5)\n| sort sort_field\n| rename title as Title, severity_override as Severity, summary as Summary, remediations as Remediations\n| table Time, Title, Severity, Summary, Remediations",
+        "queryParameters": {
+          "earliest": "$global_time.earliest$",
+          "latest": "$global_time.latest$"
+        }
+      },
+      "name": "Table search"
+    }
+  },
+  "visualizations": {
+    "viz_detail_table": {
+      "type": "splunk.table",
+      "options": {
+        "count": 20,
+        "dataOverlayMode": "none",
+        "drilldown": "none",
+        "showRowNumbers": false,
+        "showInternalFields": false,
+        "columnFormat": {
+          "Severity": {
+            "data": "> table | seriesByName(\"Severity\") | formatByType(SeverityColumnFormatEditorConfig)",
+            "rowColors": "> table | seriesByName('Severity') | pick(SeverityRowColorsEditorConfig)",
+            "rowBackgroundColors": "> table | seriesByName(\"Severity\") | matchValue(SeverityRowBackgroundColorsEditorConfig)"
+          }
+        }
+      },
+      "dataSources": {
+        "primary": "ds_table_search"
+      },
+      "context": {
+        "SeverityColumnFormatEditorConfig": {
+          "string": {
+            "unitPosition": "after"
+          }
+        },
+        "SeverityRowColorsEditorConfig": [
+          "#ffffff"
+        ],
+        "SeverityRowBackgroundColorsEditorConfig": [
+          {
+            "match": "inhibitor",
+            "value": "#ff6060"
+          },
+          {
+            "match": "high",
+            "value": "#ffac1c"
+          },
+          {
+            "match": "medium",
+            "value": "#ffea00"
+          },
+          {
+            "match": "low",
+            "value": "#90ff90"
+          },
+          {
+            "match": "info",
+            "value": "#89cff0"
+          }
+        ]
+      }
+    }
+  },
+  "inputs": {
+    "input_global_trp": {
+      "type": "input.timerange",
+      "options": {
+        "token": "global_time",
+        "defaultValue": "-7d@h,now"
+      },
+      "title": "Global Time Range"
+    },
+    "input_host_text": {
+      "options": {
+        "defaultValue": "*",
+        "token": "host"
+      },
+      "title": "Host",
+      "type": "input.text"
+    },
+    "input_search_text": {
+      "options": {
+        "defaultValue": "*",
+        "token": "search"
+      },
+      "title": "Text Search",
+      "type": "input.text"
+    },
+    "input_severity_dropdown": {
+      "options": {
+        "items": [
+          {
+            "label": "All",
+            "value": "*"
+          },
+          {
+            "label": "Inhibitor",
+            "value": "inhibitor"
+          },
+          {
+            "label": "High",
+            "value": "high"
+          },
+          {
+            "label": "Medium",
+            "value": "medium"
+          },
+          {
+            "label": "Low",
+            "value": "low"
+          },
+          {
+            "label": "Info",
+            "value": "info"
+          }
+        ],
+        "defaultValue": "*",
+        "token": "severity"
+      },
+      "title": "Severity",
+      "type": "input.dropdown"
+    },
+    "input_jobid_text": {
+      "options": {
+        "defaultValue": "*",
+        "token": "job_id"
+      },
+      "title": "Job ID",
+      "type": "input.text"
+    }
+  },
+  "layout": {
+    "type": "grid",
+    "options": {
+      "submitButton": true,
+      "submitOnDashboardLoad": true
+    },
+    "structure": [
+      {
+        "item": "viz_detail_table",
+        "type": "block",
+        "position": {
+          "x": 0,
+          "y": 0,
+          "w": 1200,
+          "h": 1000
+        }
+      }
+    ],
+    "globalInputs": [
+      "input_global_trp",
+      "input_host_text",
+      "input_search_text",
+      "input_severity_dropdown",
+      "input_jobid_text"
+    ]
+  },
+  "title": "RIPU Pre-upgrade Detail Report",
+  "defaults": {
+    "dataSources": {
+      "ds.search": {
+        "options": {
+          "queryParameters": {
+            "latest": "$global_time.latest$",
+            "earliest": "$global_time.earliest$"
+          }
+        }
+      }
+    }
+  },
+  "description": "Lists pre-upgrade analysis findings ranked by severity"
+}

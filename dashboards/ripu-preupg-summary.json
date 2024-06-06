@@ -1,0 +1,290 @@
+{
+  "dataSources": {
+    "ds_base_search": {
+      "type": "ds.search",
+      "options": {
+        "query": "index=\"rh_rhdp_ripu\" event_type=\"leapp_report\" hostname=*$host$* pet_app_team=$team$\n| where pet_app_env IN ($env$)\n| spath path=report.entries{} output=entries\n| mvexpand entries\n| spath input=entries path=flags{} output=flags\n| stats latest(_time) as time, values(pet_app_env) as app_env, values(pet_app_team) as app_team, values(region) as region, count(eval(match(flags, \"inhibitor\"))) as inhibitor_count by job_id, hostname\n| sort - time\n| dedup hostname\n| eval Time=strftime(time, \"%Y-%m-%d %H:%M:%S\"), eligible=if(inhibitor_count=0, \"true\", \"false\")\n| search eligible=$eligible$",
+        "queryParameters": {
+          "earliest": "$global_time.earliest$",
+          "latest": "$global_time.latest$"
+        }
+      },
+      "name": "base"
+    },
+    "ds_table_chain": {
+      "type": "ds.chain",
+      "options": {
+        "extend": "ds_base_search",
+        "query": "| rename hostname as Host, job_id as \"Job ID\", app_env as Environment, app_team as \"App Team\", region as Region, inhibitor_count as Inhibitors\n| table Time, \"Job ID\", Host, Environment, \"App Team\", Region, Inhibitors"
+      },
+      "name": "table"
+    },
+    "ds_chart_chain": {
+      "type": "ds.chain",
+      "options": {
+        "extend": "ds_base_search",
+        "query": "| stats count by eligible"
+      },
+      "name": "chart"
+    },
+    "ds_count_chain": {
+      "type": "ds.chain",
+      "options": {
+        "extend": "ds_base_search",
+        "query": "| stats dc(hostname)"
+      },
+      "name": "count"
+    }
+  },
+  "visualizations": {
+    "viz_host_table": {
+      "type": "splunk.table",
+      "options": {
+        "count": 20,
+        "dataOverlayMode": "none",
+        "drilldown": "none",
+        "columnFormat": {
+          "Inhibitors": {
+            "data": "> table | seriesByName(\"Inhibitors\") | formatByType(InhibitorsColumnFormatEditorConfig)",
+            "rowColors": "> table | seriesByName('Inhibitors') | pick(InhibitorsRowColorsEditorConfig)",
+            "rowBackgroundColors": "> table | seriesByName(\"Inhibitors\") | rangeValue(InhibitorsRowBackgroundColorsEditorConfig)",
+            "align": "> table | seriesByName('Inhibitors') | pick(InhibitorsAlignConfig)"
+          }
+        },
+        "fontSize": "large",
+        "showInternalFields": false,
+        "headerVisibility": "fixed"
+      },
+      "dataSources": {
+        "primary": "ds_table_chain"
+      },
+      "context": {
+        "InhibitorsColumnFormatEditorConfig": {
+          "number": {
+            "thousandSeparated": false,
+            "unitPosition": "after"
+          }
+        },
+        "InhibitorsRowColorsEditorConfig": [
+          "#ffffff"
+        ],
+        "InhibitorsRowBackgroundColorsEditorConfig": [
+          {
+            "value": "#118832",
+            "to": 1
+          },
+          {
+            "value": "#d41f1f",
+            "from": 1
+          }
+        ],
+        "InhibitorsAlignConfig": [
+          "left"
+        ]
+      },
+      "eventHandlers": [
+        {
+          "type": "drilldown.linkToDashboard",
+          "options": {
+            "app": "search",
+            "dashboard": "ripu-preupg-detail",
+            "newTab": true,
+            "tokens": [
+              {
+                "token": "host",
+                "value": "row.Host.value"
+              },
+              {
+                "token": "job_id",
+                "value": "row.Job ID.value"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "viz_eligible_pie": {
+      "type": "splunk.pie",
+      "dataSources": {
+        "primary": "ds_chart_chain"
+      },
+      "title": "Eligible for Upgrade",
+      "options": {
+        "seriesColors": [
+          "#d41f1f",
+          "#118832"
+        ]
+      }
+    },
+    "viz_hostcount_singlevalue": {
+      "type": "splunk.singlevalue",
+      "dataSources": {
+        "primary": "ds_count_chain"
+      },
+      "title": "Host Count"
+    }
+  },
+  "inputs": {
+    "input_global_trp": {
+      "type": "input.timerange",
+      "options": {
+        "token": "global_time",
+        "defaultValue": "-7d@h,now"
+      },
+      "title": "Global Time Range"
+    },
+    "input_host_text": {
+      "options": {
+        "defaultValue": "*",
+        "token": "host"
+      },
+      "title": "Host",
+      "type": "input.text"
+    },
+    "input_team_dropdown": {
+      "options": {
+        "items": [
+          {
+            "label": "All",
+            "value": "*"
+          },
+          {
+            "label": "Dog",
+            "value": "Dog"
+          },
+          {
+            "label": "Cat",
+            "value": "Cat"
+          },
+          {
+            "label": "Bird",
+            "value": "Bird"
+          },
+          {
+            "label": "Hamster",
+            "value": "Hamster"
+          },
+          {
+            "label": "Snake",
+            "value": "Snake"
+          },
+          {
+            "label": "Lizard",
+            "value": "Lizard"
+          },
+          {
+            "label": "Fish",
+            "value": "Fish"
+          }
+        ],
+        "defaultValue": "*",
+        "token": "team"
+      },
+      "title": "App Team",
+      "type": "input.dropdown"
+    },
+    "input_eligible_dropdown": {
+      "options": {
+        "items": [
+          {
+            "label": "All",
+            "value": "*"
+          },
+          {
+            "label": "True",
+            "value": "\"true\""
+          },
+          {
+            "label": "False",
+            "value": "\"false\""
+          }
+        ],
+        "defaultValue": "*",
+        "token": "eligible"
+      },
+      "title": "Upgrade Eligible",
+      "type": "input.dropdown"
+    },
+    "input_env_multiselect": {
+      "options": {
+        "items": [
+          {
+            "label": "Test",
+            "value": "\"Test\""
+          },
+          {
+            "label": "Dev",
+            "value": "\"Dev\""
+          },
+          {
+            "label": "Prod",
+            "value": "\"Prod\""
+          }
+        ],
+        "defaultValue": [
+          "\"Test\"",
+          "\"Dev\"",
+          "\"Prod\""
+        ],
+        "token": "env"
+      },
+      "title": "Environment",
+      "type": "input.multiselect"
+    }
+  },
+  "layout": {
+    "type": "grid",
+    "options": {
+      "submitButton": true,
+      "submitOnDashboardLoad": true
+    },
+    "structure": [
+      {
+        "item": "viz_hostcount_singlevalue",
+        "type": "block",
+        "position": {
+          "x": 0,
+          "y": 0,
+          "w": 600,
+          "h": 275
+        }
+      },
+      {
+        "item": "viz_host_table",
+        "type": "block",
+        "position": {
+          "x": 0,
+          "y": 275,
+          "w": 1200,
+          "h": 725
+        }
+      },
+      {
+        "item": "viz_eligible_pie",
+        "type": "block",
+        "position": {
+          "x": 600,
+          "y": 0,
+          "w": 600,
+          "h": 275
+        }
+      }
+    ],
+    "globalInputs": [
+      "input_global_trp",
+      "input_host_text",
+      "input_env_multiselect",
+      "input_team_dropdown",
+      "input_eligible_dropdown"
+    ]
+  },
+  "title": "RIPU Pre-upgrade Summary",
+  "defaults": {
+    "dataSources": {
+      "ds.search": {
+        "options": {}
+      }
+    }
+  },
+  "description": "Based on pre-upgrade reports generated in the given timeframe"
+}
