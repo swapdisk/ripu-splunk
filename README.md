@@ -14,6 +14,14 @@ There are three example dashboards included with this reference implementation. 
 - [Pre-upgrade Detail Report](./dashboards/ripu-preupg-detail.json)
 - [Upgrade Progress Timeline](./dashboards/ripu-upgrade-timeline.json)
 
+## Screenshots
+
+![Pre-upgrade Summary Dashboard](images/ripu-preupg-summary.svg)
+
+![Pre-upgrade Detail Report](images/ripu-preupg-detail.svg)
+
+![Upgrade Progress Timeline](images/ripu-upgrade-timeline.svg)
+
 ## Data structure of RIPU events
 
 The data presented by the example dashboards comes from events sent when Analysis and Upgrade jobs are executed in the RHDP workshop lab environment. Refer to the "Assemble payload for Splunk" and "Send event to Splunk" tasks of the following Ansible playbooks:
