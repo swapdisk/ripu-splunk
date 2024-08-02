@@ -5,8 +5,8 @@
       "options": {
         "query": "index=\"rh_rhdp_ripu\" event_type=\"leapp_report\" hostname=$host$ job_id=$job_id$\n| spath path=report.entries{} output=entries\n| mvexpand entries\n| spath input=entries path=title output=title\n| spath input=entries path=severity output=severity\n| spath input=entries path=summary output=summary\n| spath input=entries path=flags{} output=flags\n| spath input=entries path=detail.remediations{}.context output=remediations\n| eval Time=strftime(_time, \"%Y-%m-%d %H:%M:%S\"), severity_override=if(match(flags, \"inhibitor\"), \"inhibitor\", severity), search_string=if(\"$search$\"=\"*\", \"\", \"$search$\")\n| where match(summary, search_string)\n| search severity_override=$severity$\n| eval sort_field=case(severity_override=\"inhibitor\", 1, severity_override=\"high\", 2, severity_override=\"medium\", 3, severity_override=\"low\", 4, severity_override=\"info\", 5)\n| sort sort_field\n| rename title as Title, severity_override as Severity, summary as Summary, remediations as Remediations\n| table Time, Title, Severity, Summary, Remediations",
         "queryParameters": {
-          "earliest": "$global_time.earliest$",
-          "latest": "$global_time.latest$"
+          "earliest": "-30d@d",
+          "latest": "now"
         }
       },
       "name": "Table search"
@@ -67,14 +67,6 @@
     }
   },
   "inputs": {
-    "input_global_trp": {
-      "type": "input.timerange",
-      "options": {
-        "token": "global_time",
-        "defaultValue": "-7d@h,now"
-      },
-      "title": "Global Time Range"
-    },
     "input_host_text": {
       "options": {
         "defaultValue": "*",
@@ -153,7 +145,6 @@
       }
     ],
     "globalInputs": [
-      "input_global_trp",
       "input_host_text",
       "input_search_text",
       "input_severity_dropdown",
@@ -161,17 +152,5 @@
     ]
   },
   "title": "RIPU Pre-upgrade Detail Report",
-  "defaults": {
-    "dataSources": {
-      "ds.search": {
-        "options": {
-          "queryParameters": {
-            "latest": "$global_time.latest$",
-            "earliest": "$global_time.earliest$"
-          }
-        }
-      }
-    }
-  },
   "description": "Lists pre-upgrade analysis findings ranked by severity"
 }
