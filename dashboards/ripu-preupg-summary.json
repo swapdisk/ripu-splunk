@@ -3,7 +3,7 @@
     "ds_base_search": {
       "type": "ds.search",
       "options": {
-        "query": "index=\"rh_rhdp_ripu\" event_type=\"leapp_report\" hostname=*$host$* pet_app_team=$team$\n| where pet_app_env IN ($env$)\n| spath path=report.entries{} output=entries\n| mvexpand entries\n| spath input=entries path=flags{} output=flags\n| stats latest(_time) as time, values(pet_app_env) as app_env, values(pet_app_team) as app_team, values(region) as region, count(eval(match(flags, \"inhibitor\"))) as inhibitor_count by job_id, hostname\n| sort - time\n| dedup hostname\n| eval Time=strftime(time, \"%Y-%m-%d %H:%M:%S\"), eligible=if(inhibitor_count=0, \"true\", \"false\")\n| search eligible=$eligible$",
+        "query": "index=\"rh_rhdp_ripu\" event_type=\"leapp_report\" hostname=*$host$* pet_app_team=$team$\n| where pet_app_env IN ($env$)\n| spath path=report.entries{} output=entries\n| mvexpand entries\n| spath input=entries path=flags{} output=flags\n| spath input=entries path=groups{} output=groups\n| stats latest(_time) as time, values(pet_app_env) as app_env, values(pet_app_team) as app_team, values(region) as region, count(eval(match(flags, \"inhibitor\") or match(groups, \"error|inhibitor\"))) as inhibitor_count by job_id, hostname\n| sort - time\n| dedup hostname\n| eval Time=strftime(time, \"%Y-%m-%d %H:%M:%S\"), eligible=if(inhibitor_count=0, \"true\", \"false\")\n| search eligible=$eligible$",
         "queryParameters": {
           "earliest": "$global_time.earliest$",
           "latest": "$global_time.latest$"
