@@ -45,7 +45,7 @@ Events of type `playbook_run` include the following additional data objects:
 
 Events of type `leapp_report` include a json object containing the Leapp pre-upgrade report: 
 
-- `report` (json) Leapp pre-upgrade report contents copied from the `/var/log/leapp/leapp-report.json` file. 
+- `report` (json) Leapp pre-upgrade report contents copied from the `/var/log/leapp/leapp-report.json` file. The example dashboards support both the original default report schema and the new report schema 1.2.0 [recently adopted](https://github.com/redhat-cop/infra.leapp/pull/216) by the `infra.leapp` collection.
 
 ## Contributing
 
