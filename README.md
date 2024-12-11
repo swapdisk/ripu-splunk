@@ -24,10 +24,10 @@ There are three example dashboards included with this reference implementation. 
 
 ## Data structure of RIPU events
 
-The data presented by the example dashboards comes from events sent when Analysis and Upgrade jobs are executed in the RHDP workshop lab environment. Refer to the "Assemble payload for Splunk" and "Send event to Splunk" tasks of the following Ansible playbooks:
+The data presented by the example dashboards comes from events sent when Analysis and Upgrade jobs are executed in the RHDP workshop lab environment. For example, refer to the "Send event to Splunk" tasks of the following Ansible playbooks:
 
-- [`analysis.yml`](https://github.com/redhat-partner-tech/leapp-project/blob/60f6cde5870a514cbbaeecc50f7f705722e3c2d7/analysis.yml#L75-L104)
-- [`upgrade.yml`](https://github.com/redhat-partner-tech/leapp-project/blob/60f6cde5870a514cbbaeecc50f7f705722e3c2d7/upgrade.yml#L27-L57)
+- [`analysis.yml`](https://github.com/redhat-partner-tech/leapp-project/blob/41f82640a92d021671954f77c2232654e7aa69bb/analysis.yml#L75-L100)
+- [`upgrade.yml`](https://github.com/redhat-partner-tech/leapp-project/blob/41f82640a92d021671954f77c2232654e7aa69bb/upgrade.yml#L27-L53)
 
 Each RIPU event includes the following data objects:
 
