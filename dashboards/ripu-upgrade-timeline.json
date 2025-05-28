@@ -15,7 +15,7 @@
       "type": "ds.chain",
       "options": {
         "extend": "ds_base_search",
-        "query": "|  eval Upgrade=case(success=\"false\", \"Failed\", like(os_version, \"8%\"), \"RHEL8\", like(os_version, \"9%\"), \"RHEL9\", true(), \"Unknown\") \n| timechart span=1d count by Upgrade"
+        "query": "|  eval Upgrade=case(success=\"false\", \"Failed\", like(os_version, \"8%\"), \"RHEL8\", like(os_version, \"9%\"), \"RHEL9\", like(os_version, \"10%\"), \"RHEL10\", true(), \"Unknown\") \n| timechart span=1d count by Upgrade"
       },
       "name": "table"
     },
@@ -31,7 +31,7 @@
       "type": "ds.chain",
       "options": {
         "extend": "ds_base_search",
-        "query": "| where success=\"true\"\n| eval status=case(like(os_version, \"8%\"), \"RHEL8\", like(os_version, \"9%\"), \"RHEL9\", true(), \"Unknown\")\n| stats count by status"
+        "query": "| where success=\"true\"\n| eval status=case(like(os_version, \"8%\"), \"RHEL8\", like(os_version, \"9%\"), \"RHEL9\", like(os_version, \"10%\"), \"RHEL10\", true(), \"Unknown\")\n| stats count by status"
       },
       "name": "count"
     }
@@ -71,7 +71,7 @@
       "showLastUpdated": false,
       "title": "Upgrade Job Timeline",
       "options": {
-        "y": "> primary | frameBySeriesNames('Failed','RHEL8','RHEL9')",
+        "y": "> primary | frameBySeriesNames('Failed','RHEL8','RHEL9','RHEL10')",
         "y2": "> primary | frameBySeriesNames('')",
         "stackMode": "stacked",
         "columnGrouping": "overlay",
@@ -79,7 +79,8 @@
         "seriesColors": [
           "#cf3f3f",
           "#dd9900",
-          "#7f7ffF"
+          "#007f97",
+          "#df4ddf"
         ]
       }
     },
@@ -105,9 +106,11 @@
       "showProgressBar": false,
       "showLastUpdated": false,
       "options": {
+        "y": "> primary | frameBySeriesNames('RHEL8','RHEL9','RHEL10')",
         "seriesColors": [
-          "#DD9900",
-          "#7f7ffF"
+          "#dd9900",
+          "#007f97",
+          "#df4ddf"
         ]
       }
     }
