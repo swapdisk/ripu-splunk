@@ -108,9 +108,9 @@
       "options": {
         "y": "> primary | frameBySeriesNames('RHEL8','RHEL9','RHEL10')",
         "seriesColors": [
+          "#df4ddf",
           "#dd9900",
-          "#007f97",
-          "#df4ddf"
+          "#007f97"
         ]
       }
     }
